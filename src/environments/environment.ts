@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://piiquante-ocmu.onrender.com'
+ apiUrl: 'https://piiquante-ocmu.onrender.com/api'
 };
 
 /*

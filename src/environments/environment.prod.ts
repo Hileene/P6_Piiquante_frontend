@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://piiquante-ocmu.onrender.com'
+apiUrl: 'https://piiquante-ocmu.onrender.com/api'
 };
