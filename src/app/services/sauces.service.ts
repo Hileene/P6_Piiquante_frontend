@@ -15,9 +15,27 @@ export class SaucesService {
   constructor(private http: HttpClient,
               private auth: AuthService) {}
 
+
+
+
+              private updateImageUrls(sauces: Sauce[]): Sauce[] {
+                return sauces.map(sauce => {
+                  // Assuming sauce.imageUrl is the complete URL for the image
+                  if (sauce.imageUrl && sauce.imageUrl.startsWith('http://')) {
+                    sauce.imageUrl = sauce.imageUrl.replace(/^http:/, 'https:');
+                  }
+                  return sauce;
+                });
+              }
+            
+
   getSauces() {
     this.http.get<Sauce[]>(`${environment.apiUrl}/sauces`).pipe(
-      tap(sauces => this.sauces$.next(sauces)),
+      // tap(sauces => this.sauces$.next(sauces)),
+      tap(sauces => {
+        const saucesWithUpdatedUrls = this.updateImageUrls(sauces);
+        this.sauces$.next(saucesWithUpdatedUrls);
+      }),
       catchError(error => {
         console.error(error.error.message);
         return of([]);
