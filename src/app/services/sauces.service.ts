@@ -15,23 +15,24 @@ export class SaucesService {
   constructor(private http: HttpClient,
               private auth: AuthService) {}
 
+  private updateImageUrls(sauces: Sauce[]): Sauce[] {
+    return sauces.map(sauce => {
+      if (sauce.imageUrl && sauce.imageUrl.startsWith('http://')) {
+        sauce.imageUrl = sauce.imageUrl.replace(/^http:/, 'https:');
+      }
+      return sauce;
+    });
+  }
 
-
-
-              private updateImageUrls(sauces: Sauce[]): Sauce[] {
-                return sauces.map(sauce => {
-                  // Assuming sauce.imageUrl is the complete URL for the image
-                  if (sauce.imageUrl && sauce.imageUrl.startsWith('http://')) {
-                    sauce.imageUrl = sauce.imageUrl.replace(/^http:/, 'https:');
-                  }
-                  return sauce;
-                });
-              }
-            
+  private updateImageUrl(sauce: Sauce): Sauce {
+    if (sauce.imageUrl && sauce.imageUrl.startsWith('http://')) {
+      sauce.imageUrl = sauce.imageUrl.replace(/^http:/, 'https:');
+    }
+    return sauce;
+  }
 
   getSauces() {
     this.http.get<Sauce[]>(`${environment.apiUrl}/sauces`).pipe(
-      // tap(sauces => this.sauces$.next(sauces)),
       tap(sauces => {
         const saucesWithUpdatedUrls = this.updateImageUrls(sauces);
         this.sauces$.next(saucesWithUpdatedUrls);
@@ -45,6 +46,10 @@ export class SaucesService {
 
   getSauceById(id: string) {
     return this.http.get<Sauce>(`${environment.apiUrl}/sauces/${id}`).pipe(
+      tap(sauce => {
+        const sauceWithUpdatedUrl = this.updateImageUrl(sauce);
+        return sauceWithUpdatedUrl;
+      }),
       catchError(error => throwError(error.error.message))
     );
   }
@@ -74,6 +79,11 @@ export class SaucesService {
     formData.append('sauce', JSON.stringify(sauce));
     formData.append('image', image);
     return this.http.post<{ message: string }>(`${environment.apiUrl}/sauces`, formData).pipe(
+      tap(() => {
+        sauce = this.updateImageUrl(sauce);
+        const saucesWithUpdatedUrls = this.updateImageUrls([sauce]);
+        this.sauces$.next(saucesWithUpdatedUrls);
+      }),
       catchError(error => throwError(error.error.message))
     );
   }
@@ -81,6 +91,11 @@ export class SaucesService {
   modifySauce(id: string, sauce: Sauce, image: string | File) {
     if (typeof image === 'string') {
       return this.http.put<{ message: string }>(`${environment.apiUrl}/sauces/${id}`, sauce).pipe(
+        tap(() => {
+          sauce = this.updateImageUrl(sauce);
+          const saucesWithUpdatedUrls = this.updateImageUrls([sauce]);
+          this.sauces$.next(saucesWithUpdatedUrls);
+        }),
         catchError(error => throwError(error.error.message))
       );
     } else {
@@ -88,6 +103,11 @@ export class SaucesService {
       formData.append('sauce', JSON.stringify(sauce));
       formData.append('image', image);
       return this.http.put<{ message: string }>(`${environment.apiUrl}/sauces/${id}`, formData).pipe(
+        tap(() => {
+          sauce = this.updateImageUrl(sauce);
+          const saucesWithUpdatedUrls = this.updateImageUrls([sauce]);
+          this.sauces$.next(saucesWithUpdatedUrls);
+        }),
         catchError(error => throwError(error.error.message))
       );
     }
