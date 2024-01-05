@@ -39,9 +39,6 @@ export class SingleSauceComponent implements OnInit {
         } else if (sauce.usersDisliked.find(user => user === this.userId)) {
           this.disliked = true;
         }
-        if (sauce.imageUrl && sauce.imageUrl.startsWith('http://')) {
-          sauce.imageUrl = sauce.imageUrl.replace(/^http:/, 'https:');
-        }
       })
     );
   }
